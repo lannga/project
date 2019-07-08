@@ -2,7 +2,6 @@ package crawler;
 
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.bson.Document;
@@ -20,7 +19,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
-public class Driver{
+public class Driver extends Thread{
 	
 	private WebDriver driver ;
 	private String fileName;
@@ -47,6 +46,7 @@ public class Driver{
 		driver = new ChromeDriver(options);		
 		driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
+
 		MongoDatabase database = new MongoClient( host , port ).getDatabase(databaseName);
 		
 		collection = database.getCollection(fileName);
@@ -58,9 +58,10 @@ public class Driver{
 	}
 	
 	
+	@Override
 	public void run() {
 		begin();
-		String currentURL ="",contentURL,id,content;
+		String currentURL ="https://www.vietnamworks.com/"+url,contentURL,id,content;
 		Document d;
 		WebElement k,h;
 		JavascriptExecutor js = ((JavascriptExecutor) driver);
@@ -81,7 +82,7 @@ public class Driver{
 				break;
 			}
 			
-//				if(i >= 6) break;				
+			if(i >= 6) break;				
 			
 			for(j = 50*i +1;j<50*(i+1);j++) {					
 				System.out.println(fileName+" : "+j);
@@ -137,10 +138,5 @@ public class Driver{
 		}
 		
 	}
-
-
-
-
-	
 	
 }
