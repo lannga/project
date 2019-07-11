@@ -2,14 +2,12 @@ package crawler;
 
 //my-work
 
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 
 import org.bson.Document;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -27,6 +25,7 @@ public class Driver2 extends Thread{
 	private WebDriver driver ;
 	private String fileName;
 	private String url;
+	private String label;
 	private MongoCollection<Document> collection;
 	
 	static int size = 20;
@@ -40,6 +39,10 @@ public class Driver2 extends Thread{
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 	
 	public void begin() {
@@ -68,57 +71,54 @@ public class Driver2 extends Thread{
 		WebElement k;
 		FindIterable<Document> filter;
 		MongoCursor<Document> cursor;
+		
+		
+		
 		while(true) {
 			
 			currentURL = "https://mywork.com.vn/tuyen-dung/trang/"+i+"?categories="+url;
+			
 			driver.get(currentURL);
+			
 			if(driver.findElement(By.cssSelector("li.page-item:last-child")).getAttribute("class").equals("page-item disabled"))
 				break;
 			
 			for(j = 1;j<=size;j++) {	
 				
-				System.out.println(fileName+" : "+j+"\n page : "+i);
+				//System.out.println(fileName+" : "+j+"\n page : "+i);
 				
-
 				try {
 					k = driver.findElement(By.xpath("//section[@class='item']"+"["+j+"]//p/a"));
 
 					contentURL =k.getAttribute("href");	
-					
 				
 					id = getId(contentURL);
 
 					filter = collection.find(Filters.eq("_id",id));
 					cursor = filter.iterator();
-					
-
-					
+			
 					if(cursor.hasNext() == false)
 					{
 						driver.get(contentURL);
 						
 						content = driver.findElement(By.xpath("//h3[text()='Mô tả công việc ']/following-sibling::div[1]")).getText();
-						d = new Document("_id",id).append("url", contentURL).append("content", content);
-						System.out.println("koco"+d.toJson());
+						
+						d = new Document("_id",id).append("url", contentURL).append("content", content).append("label", label);
 						collection.insertOne(d);							
 						driver.get(currentURL);
 					}
-					else 
-					{
-						System.out.println("daco"+cursor.next().toJson());
+					else 					
 						continue;						
-					}
-					
-				}catch(Exception e) {
-					e.printStackTrace();	
+										
+				}catch(Exception e) {	
 					driver.get(currentURL);
 				}					
 			}
+			
 			i++;
 		}		
 
-		driver.quit();
-		
+		driver.quit();		
 	}
 	
 
@@ -129,5 +129,7 @@ public class Driver2 extends Thread{
 			 id = st.nextToken();
 		return id;
 	}
+
+
 	
 }

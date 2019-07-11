@@ -1,5 +1,8 @@
 package crawler;
 
+import java.io.IOException;
+import java.util.Scanner;
+
 ///vieclam24
 
 
@@ -12,7 +15,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -20,12 +22,13 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
-public class Driver3 extends Thread{
+public class Driver3 {
 
 
 	private WebDriver driver ;
 	private String fileName;
 	private String url;
+	private int label;
 	private MongoCollection<Document> collection;
 	
 	static int size = 10;
@@ -39,6 +42,10 @@ public class Driver3 extends Thread{
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+	
+	public void setLabel(int label) {
+		this.label = label;
 	}
 	
 	public void begin() {
@@ -59,21 +66,7 @@ public class Driver3 extends Thread{
 		collection = database.getCollection(fileName);
 	}
 	
-	
-//	public void check() {
-//		int i = 25;
-//		for(;;) {
-//			driver.get("https://vieclam24h.vn/ban-hang-c63.html?page="+i);
-//			
-//			WebElement w = driver.findElement(By.cssSelector("li.next"));
-//			System.out.println(w.getAttribute("class"));
-//			
-//			if(w.getAttribute("class").equals("next active")) break;
-//			
-//			i++;
-//		}
-//	}
-	@Override
+
 	public void run() {		
 		begin();
 		String url ="https://vieclam24h.vn/"+this.url+"?page=",contentURL,id,content;
@@ -83,6 +76,9 @@ public class Driver3 extends Thread{
 		FindIterable<Document> filter;
 		MongoCursor<Document> cursor;
 		
+		Scanner s = new Scanner(System.in);
+		String check;
+		
 		while(true) {
 			String currentURL = url +i;
 			driver.get(currentURL);
@@ -90,7 +86,7 @@ public class Driver3 extends Thread{
 			
 			for(j = 1;j<=size;j++) {	
 				
-				System.out.println(fileName+" : "+j+"   page : "+i);	
+//				System.out.println(fileName+" : "+j+"   page : "+i);	
 								
 				try {
 					
@@ -114,17 +110,18 @@ public class Driver3 extends Thread{
 						
 						content = driver.findElement(By.xpath("//div[@class=\"item row\"][1]/p")).getText();
 					
-						
-						
-						d = new Document("_id",id).append("url", contentURL).append("content", content);
-						System.out.println("koco"+d.toJson());
+//						System.out.println(content);
+//						check = s.nextLine();
+				
+						d = new Document("_id",id).append("url", contentURL).append("content", content).append("label",label);
+//						System.out.println("koco"+d.toJson());
 						collection.insertOne(d);
 						
 						driver.get(currentURL);
 					}
 					else 
 					{
-						System.out.println("daco"+cursor.next().toJson());
+//						System.out.println("daco"+cursor.next().toJson());
 						continue;
 					
 					}
